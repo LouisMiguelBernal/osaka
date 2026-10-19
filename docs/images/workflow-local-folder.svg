@@ -1,0 +1,98 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2404 604" width="2404" height="604" role="img" aria-label="OSAKA — Local folder intake">
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#5b6574"/></marker>
+<pattern id="dots" width="20" height="20" patternUnits="userSpaceOnUse"><circle cx="1" cy="1" r="1" fill="#2c313a"/></pattern></defs>
+<style>.lbl{font:600 11px 'Segoe UI',Inter,Arial,sans-serif;fill:#e5e7eb}.ico{font:700 22px 'Segoe UI Symbol','Segoe UI',Arial,sans-serif}.ttl{font:700 16px 'Segoe UI',Inter,Arial,sans-serif;fill:#f3f4f6}.sub{font:12px 'Segoe UI',Inter,Arial,sans-serif;fill:#9ca3af}</style>
+<rect width="100%" height="100%" fill="#1f2228"/><rect width="100%" height="100%" fill="url(#dots)"/>
+<text x="20" y="28" class="ttl">OSAKA — Local folder intake</text><text x="20" y="46" class="sub">15 nodes · generated from n8n/workflows</text>
+<path d="M134,202 C212,202 212,202 290,202" fill="none" stroke="#5b6574" stroke-width="2" marker-end="url(#arrow)"/>
+<path d="M354,202 C432,202 432,202 510,202" fill="none" stroke="#5b6574" stroke-width="2" marker-end="url(#arrow)"/>
+<path d="M574,202 C652,202 652,202 730,202" fill="none" stroke="#5b6574" stroke-width="2" marker-end="url(#arrow)"/>
+<path d="M134,462 C212,462 212,462 290,462" fill="none" stroke="#5b6574" stroke-width="2" marker-end="url(#arrow)"/>
+<path d="M354,462 C432,462 432,462 510,462" fill="none" stroke="#5b6574" stroke-width="2" marker-end="url(#arrow)"/>
+<path d="M794,202 C872,202 872,322 950,322" fill="none" stroke="#5b6574" stroke-width="2" marker-end="url(#arrow)"/>
+<path d="M574,462 C762,462 762,322 950,322" fill="none" stroke="#5b6574" stroke-width="2" marker-end="url(#arrow)"/>
+<path d="M1014,322 C1092,322 1092,322 1170,322" fill="none" stroke="#5b6574" stroke-width="2" marker-end="url(#arrow)"/>
+<path d="M1234,315 C1312,315 1312,102 1390,102" fill="none" stroke="#5b6574" stroke-width="2" marker-end="url(#arrow)"/>
+<path d="M1234,329 C1312,329 1312,322 1390,322" fill="none" stroke="#5b6574" stroke-width="2" marker-end="url(#arrow)"/>
+<path d="M1454,322 C1532,322 1532,322 1610,322" fill="none" stroke="#5b6574" stroke-width="2" marker-end="url(#arrow)"/>
+<path d="M1674,322 C1752,322 1752,322 1830,322" fill="none" stroke="#5b6574" stroke-width="2" marker-end="url(#arrow)"/>
+<path d="M1894,322 C1972,322 1972,322 2050,322" fill="none" stroke="#5b6574" stroke-width="2" marker-end="url(#arrow)"/>
+<path d="M2114,315 C2192,315 2192,242 2270,242" fill="none" stroke="#5b6574" stroke-width="2" marker-end="url(#arrow)"/>
+<path d="M2114,329 C2174,329 2174,439 1642,439 S1110,322 1170,322" fill="none" stroke="#5b6574" stroke-width="2" stroke-dasharray="6 5" marker-end="url(#arrow)"/>
+<path d="M2334,242 C2394,242 2394,432 1752,432 S1110,322 1170,322" fill="none" stroke="#5b6574" stroke-width="2" stroke-dasharray="6 5" marker-end="url(#arrow)"/>
+<g>
+  <rect x="70" y="170" width="64" height="64" rx="26" fill="#2a2f38" stroke="#ff6d5a" stroke-width="2"/>
+  <text x="102" y="209" text-anchor="middle" class="ico" fill="#ff6d5a">▶</text>
+  <text x="102" y="252" text-anchor="middle" class="lbl">Watch inbox</text>
+</g>
+<g>
+  <rect x="290" y="170" width="64" height="64" rx="10" fill="#2a2f38" stroke="#f5a623" stroke-width="2"/>
+  <text x="322" y="209" text-anchor="middle" class="ico" fill="#f5a623">{ }</text>
+  <text x="322" y="252" text-anchor="middle" class="lbl">Only PDFs</text>
+</g>
+<g>
+  <rect x="510" y="170" width="64" height="64" rx="10" fill="#2a2f38" stroke="#2db67c" stroke-width="2"/>
+  <text x="542" y="209" text-anchor="middle" class="ico" fill="#2db67c">⎘</text>
+  <text x="542" y="252" text-anchor="middle" class="lbl">Read PDF</text>
+</g>
+<g>
+  <rect x="730" y="170" width="64" height="64" rx="10" fill="#2a2f38" stroke="#f5a623" stroke-width="2"/>
+  <text x="762" y="209" text-anchor="middle" class="ico" fill="#f5a623">{ }</text>
+  <text x="762" y="252" text-anchor="middle" class="lbl">Attach file info</text>
+</g>
+<g>
+  <rect x="70" y="430" width="64" height="64" rx="26" fill="#2a2f38" stroke="#ff6d5a" stroke-width="2"/>
+  <text x="102" y="469" text-anchor="middle" class="ico" fill="#ff6d5a">▶</text>
+  <text x="102" y="512" text-anchor="middle" class="lbl">Sweeper (every 10</text><text x="102" y="526" text-anchor="middle" class="lbl">min)</text>
+</g>
+<g>
+  <rect x="290" y="430" width="64" height="64" rx="10" fill="#2a2f38" stroke="#2db67c" stroke-width="2"/>
+  <text x="322" y="469" text-anchor="middle" class="ico" fill="#2db67c">⎘</text>
+  <text x="322" y="512" text-anchor="middle" class="lbl">Read all PDFs</text>
+</g>
+<g>
+  <rect x="510" y="430" width="64" height="64" rx="10" fill="#2a2f38" stroke="#f5a623" stroke-width="2"/>
+  <text x="542" y="469" text-anchor="middle" class="ico" fill="#f5a623">{ }</text>
+  <text x="542" y="512" text-anchor="middle" class="lbl">Sweep file info</text>
+</g>
+<g>
+  <rect x="950" y="290" width="64" height="64" rx="10" fill="#2a2f38" stroke="#64748b" stroke-width="2"/>
+  <text x="982" y="329" text-anchor="middle" class="ico" fill="#64748b">○</text>
+  <text x="982" y="372" text-anchor="middle" class="lbl">Queue</text>
+</g>
+<g>
+  <rect x="1170" y="290" width="64" height="64" rx="10" fill="#2a2f38" stroke="#3b82f6" stroke-width="2"/>
+  <text x="1202" y="329" text-anchor="middle" class="ico" fill="#3b82f6">↻</text>
+  <text x="1202" y="372" text-anchor="middle" class="lbl">One at a time</text>
+</g>
+<g>
+  <rect x="1390" y="70" width="64" height="64" rx="10" fill="#2a2f38" stroke="#64748b" stroke-width="2"/>
+  <text x="1422" y="109" text-anchor="middle" class="ico" fill="#64748b">○</text>
+  <text x="1422" y="152" text-anchor="middle" class="lbl">All done</text>
+</g>
+<g>
+  <rect x="1390" y="290" width="64" height="64" rx="10" fill="#2a2f38" stroke="#f5a623" stroke-width="2"/>
+  <text x="1422" y="329" text-anchor="middle" class="ico" fill="#f5a623">{ }</text>
+  <text x="1422" y="372" text-anchor="middle" class="lbl">Sign request</text><text x="1422" y="386" text-anchor="middle" class="lbl">(local)</text>
+</g>
+<g>
+  <rect x="1610" y="290" width="64" height="64" rx="10" fill="#2a2f38" stroke="#7b61ff" stroke-width="2"/>
+  <text x="1642" y="329" text-anchor="middle" class="ico" fill="#7b61ff">⇄</text>
+  <text x="1642" y="372" text-anchor="middle" class="lbl">OSAKA: process PDF</text>
+</g>
+<g>
+  <rect x="1830" y="290" width="64" height="64" rx="10" fill="#2a2f38" stroke="#f5a623" stroke-width="2"/>
+  <text x="1862" y="329" text-anchor="middle" class="ico" fill="#f5a623">{ }</text>
+  <text x="1862" y="372" text-anchor="middle" class="lbl">Result file</text>
+</g>
+<g>
+  <rect x="2050" y="290" width="64" height="64" rx="10" fill="#2a2f38" stroke="#00a3a3" stroke-width="2"/>
+  <text x="2082" y="329" text-anchor="middle" class="ico" fill="#00a3a3">◇</text>
+  <text x="2082" y="372" text-anchor="middle" class="lbl">New result?</text>
+</g>
+<g>
+  <rect x="2270" y="210" width="64" height="64" rx="10" fill="#2a2f38" stroke="#2db67c" stroke-width="2"/>
+  <text x="2302" y="249" text-anchor="middle" class="ico" fill="#2db67c">⎘</text>
+  <text x="2302" y="292" text-anchor="middle" class="lbl">Write result JSON</text>
+</g>
+</svg>

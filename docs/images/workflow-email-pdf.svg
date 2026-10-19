@@ -1,0 +1,250 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 6144 1004" width="6144" height="1004" role="img" aria-label="OSAKA — Email PDF intake">
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#5b6574"/></marker>
+<pattern id="dots" width="20" height="20" patternUnits="userSpaceOnUse"><circle cx="1" cy="1" r="1" fill="#2c313a"/></pattern></defs>
+<style>.lbl{font:600 11px 'Segoe UI',Inter,Arial,sans-serif;fill:#e5e7eb}.ico{font:700 22px 'Segoe UI Symbol','Segoe UI',Arial,sans-serif}.ttl{font:700 16px 'Segoe UI',Inter,Arial,sans-serif;fill:#f3f4f6}.sub{font:12px 'Segoe UI',Inter,Arial,sans-serif;fill:#9ca3af}</style>
+<rect width="100%" height="100%" fill="#1f2228"/><rect width="100%" height="100%" fill="url(#dots)"/>
+<text x="20" y="28" class="ttl">OSAKA — Email PDF intake</text><text x="20" y="46" class="sub">39 nodes · generated from n8n/workflows</text>
+<path d="M134,602 C212,602 212,602 290,602" fill="none" stroke="#5b6574" stroke-width="2" marker-end="url(#arrow)"/>
+<path d="M354,602 C432,602 432,602 510,602" fill="none" stroke="#5b6574" stroke-width="2" marker-end="url(#arrow)"/>
+<path d="M574,602 C652,602 652,602 730,602" fill="none" stroke="#5b6574" stroke-width="2" marker-end="url(#arrow)"/>
+<path d="M794,602 C872,602 872,602 950,602" fill="none" stroke="#5b6574" stroke-width="2" marker-end="url(#arrow)"/>
+<path d="M1014,609 C1092,609 1092,602 1170,602" fill="none" stroke="#5b6574" stroke-width="2" marker-end="url(#arrow)"/>
+<path d="M1234,595 C1312,595 1312,502 1390,502" fill="none" stroke="#5b6574" stroke-width="2" marker-end="url(#arrow)"/>
+<path d="M1234,609 C1312,609 1312,862 1390,862" fill="none" stroke="#5b6574" stroke-width="2" marker-end="url(#arrow)"/>
+<path d="M1454,862 C1532,862 1532,862 1610,862" fill="none" stroke="#5b6574" stroke-width="2" marker-end="url(#arrow)"/>
+<path d="M1674,862 C1734,862 1734,972 1312,972 S890,602 950,602" fill="none" stroke="#5b6574" stroke-width="2" stroke-dasharray="6 5" marker-end="url(#arrow)"/>
+<path d="M1454,502 C1532,502 1532,502 1610,502" fill="none" stroke="#5b6574" stroke-width="2" marker-end="url(#arrow)"/>
+<path d="M1674,502 C1752,502 1752,502 1830,502" fill="none" stroke="#5b6574" stroke-width="2" marker-end="url(#arrow)"/>
+<path d="M1894,502 C1972,502 1972,502 2050,502" fill="none" stroke="#5b6574" stroke-width="2" marker-end="url(#arrow)"/>
+<path d="M2114,481 C2192,481 2192,302 2270,302" fill="none" stroke="#5b6574" stroke-width="2" marker-end="url(#arrow)"/>
+<path d="M2114,495 C2192,495 2192,602 2270,602" fill="none" stroke="#5b6574" stroke-width="2" marker-end="url(#arrow)"/>
+<path d="M2114,509 C2192,509 2192,802 2270,802" fill="none" stroke="#5b6574" stroke-width="2" marker-end="url(#arrow)"/>
+<path d="M2114,523 C2192,523 2192,802 2270,802" fill="none" stroke="#5b6574" stroke-width="2" marker-end="url(#arrow)"/>
+<path d="M2334,295 C2412,295 2412,202 2490,202" fill="none" stroke="#5b6574" stroke-width="2" marker-end="url(#arrow)"/>
+<path d="M2334,309 C3182,309 3182,302 4030,302" fill="none" stroke="#5b6574" stroke-width="2" marker-end="url(#arrow)"/>
+<path d="M2554,202 C2632,202 2632,202 2710,202" fill="none" stroke="#5b6574" stroke-width="2" marker-end="url(#arrow)"/>
+<path d="M2774,202 C2852,202 2852,202 2930,202" fill="none" stroke="#5b6574" stroke-width="2" marker-end="url(#arrow)"/>
+<path d="M2994,195 C3072,195 3072,102 3150,102" fill="none" stroke="#5b6574" stroke-width="2" marker-end="url(#arrow)"/>
+<path d="M2994,209 C3292,209 3292,202 3590,202" fill="none" stroke="#5b6574" stroke-width="2" marker-end="url(#arrow)"/>
+<path d="M3214,102 C3292,102 3292,102 3370,102" fill="none" stroke="#5b6574" stroke-width="2" marker-end="url(#arrow)"/>
+<path d="M3434,102 C3512,102 3512,202 3590,202" fill="none" stroke="#5b6574" stroke-width="2" marker-end="url(#arrow)"/>
+<path d="M3874,202 C3952,202 3952,202 4030,202" fill="none" stroke="#5b6574" stroke-width="2" marker-end="url(#arrow)"/>
+<path d="M4094,202 C4154,202 4154,412 4062,412 S3970,302 4030,302" fill="none" stroke="#5b6574" stroke-width="2" stroke-dasharray="6 5" marker-end="url(#arrow)"/>
+<path d="M3654,202 C3732,202 3732,202 3810,202" fill="none" stroke="#5b6574" stroke-width="2" marker-end="url(#arrow)"/>
+<path d="M4094,295 C4172,295 4172,202 4250,202" fill="none" stroke="#5b6574" stroke-width="2" marker-end="url(#arrow)"/>
+<path d="M4094,309 C4612,309 4612,302 5130,302" fill="none" stroke="#5b6574" stroke-width="2" marker-end="url(#arrow)"/>
+<path d="M4314,202 C4392,202 4392,202 4470,202" fill="none" stroke="#5b6574" stroke-width="2" marker-end="url(#arrow)"/>
+<path d="M4754,202 C4832,202 4832,202 4910,202" fill="none" stroke="#5b6574" stroke-width="2" marker-end="url(#arrow)"/>
+<path d="M4974,202 C5052,202 5052,302 5130,302" fill="none" stroke="#5b6574" stroke-width="2" marker-end="url(#arrow)"/>
+<path d="M4534,202 C4612,202 4612,202 4690,202" fill="none" stroke="#5b6574" stroke-width="2" marker-end="url(#arrow)"/>
+<path d="M5194,295 C5272,295 5272,202 5350,202" fill="none" stroke="#5b6574" stroke-width="2" marker-end="url(#arrow)"/>
+<path d="M5194,309 C5602,309 5602,302 6010,302" fill="none" stroke="#5b6574" stroke-width="2" marker-end="url(#arrow)"/>
+<path d="M5414,202 C5492,202 5492,202 5570,202" fill="none" stroke="#5b6574" stroke-width="2" marker-end="url(#arrow)"/>
+<path d="M5854,202 C5932,202 5932,202 6010,202" fill="none" stroke="#5b6574" stroke-width="2" marker-end="url(#arrow)"/>
+<path d="M6074,202 C6134,202 6134,412 6042,412 S5950,302 6010,302" fill="none" stroke="#5b6574" stroke-width="2" stroke-dasharray="6 5" marker-end="url(#arrow)"/>
+<path d="M5634,202 C5712,202 5712,202 5790,202" fill="none" stroke="#5b6574" stroke-width="2" marker-end="url(#arrow)"/>
+<path d="M6074,302 C6134,302 6134,712 3512,712 S890,602 950,602" fill="none" stroke="#5b6574" stroke-width="2" stroke-dasharray="6 5" marker-end="url(#arrow)"/>
+<path d="M2334,802 C2412,802 2412,802 2490,802" fill="none" stroke="#5b6574" stroke-width="2" marker-end="url(#arrow)"/>
+<path d="M2554,795 C2632,795 2632,702 2710,702" fill="none" stroke="#5b6574" stroke-width="2" marker-end="url(#arrow)"/>
+<path d="M2554,809 C2742,809 2742,802 2930,802" fill="none" stroke="#5b6574" stroke-width="2" marker-end="url(#arrow)"/>
+<path d="M2774,702 C2852,702 2852,802 2930,802" fill="none" stroke="#5b6574" stroke-width="2" marker-end="url(#arrow)"/>
+<path d="M2334,602 C2742,602 2742,702 3150,702" fill="none" stroke="#5b6574" stroke-width="2" marker-end="url(#arrow)"/>
+<path d="M2994,802 C3072,802 3072,702 3150,702" fill="none" stroke="#5b6574" stroke-width="2" marker-end="url(#arrow)"/>
+<path d="M3214,702 C3292,702 3292,702 3370,702" fill="none" stroke="#5b6574" stroke-width="2" marker-end="url(#arrow)"/>
+<path d="M3434,702 C3494,702 3494,812 2192,812 S890,602 950,602" fill="none" stroke="#5b6574" stroke-width="2" stroke-dasharray="6 5" marker-end="url(#arrow)"/>
+<g>
+  <rect x="70" y="570" width="64" height="64" rx="26" fill="#2a2f38" stroke="#ff6d5a" stroke-width="2"/>
+  <text x="102" y="609" text-anchor="middle" class="ico" fill="#ff6d5a">▶</text>
+  <text x="102" y="652" text-anchor="middle" class="lbl">Gmail Trigger</text>
+</g>
+<g>
+  <rect x="290" y="570" width="64" height="64" rx="10" fill="#2a2f38" stroke="#f5a623" stroke-width="2"/>
+  <text x="322" y="609" text-anchor="middle" class="ico" fill="#f5a623">{ }</text>
+  <text x="322" y="652" text-anchor="middle" class="lbl">Prepare PDFs</text>
+</g>
+<g>
+  <rect x="510" y="570" width="64" height="64" rx="10" fill="#2a2f38" stroke="#ea4335" stroke-width="2"/>
+  <text x="542" y="609" text-anchor="middle" class="ico" fill="#ea4335">✉</text>
+  <text x="542" y="652" text-anchor="middle" class="lbl">Get labels</text>
+</g>
+<g>
+  <rect x="730" y="570" width="64" height="64" rx="10" fill="#2a2f38" stroke="#f5a623" stroke-width="2"/>
+  <text x="762" y="609" text-anchor="middle" class="ico" fill="#f5a623">{ }</text>
+  <text x="762" y="652" text-anchor="middle" class="lbl">Label map + items</text>
+</g>
+<g>
+  <rect x="950" y="570" width="64" height="64" rx="10" fill="#2a2f38" stroke="#3b82f6" stroke-width="2"/>
+  <text x="982" y="609" text-anchor="middle" class="ico" fill="#3b82f6">↻</text>
+  <text x="982" y="652" text-anchor="middle" class="lbl">One at a time</text>
+</g>
+<g>
+  <rect x="1170" y="570" width="64" height="64" rx="10" fill="#2a2f38" stroke="#00a3a3" stroke-width="2"/>
+  <text x="1202" y="609" text-anchor="middle" class="ico" fill="#00a3a3">◇</text>
+  <text x="1202" y="652" text-anchor="middle" class="lbl">Has PDF?</text>
+</g>
+<g>
+  <rect x="1390" y="830" width="64" height="64" rx="10" fill="#2a2f38" stroke="#ea4335" stroke-width="2"/>
+  <text x="1422" y="869" text-anchor="middle" class="ico" fill="#ea4335">✉</text>
+  <text x="1422" y="912" text-anchor="middle" class="lbl">Reply: no PDF</text>
+</g>
+<g>
+  <rect x="1610" y="830" width="64" height="64" rx="10" fill="#2a2f38" stroke="#ea4335" stroke-width="2"/>
+  <text x="1642" y="869" text-anchor="middle" class="ico" fill="#ea4335">✉</text>
+  <text x="1642" y="912" text-anchor="middle" class="lbl">Label: failed (no</text><text x="1642" y="926" text-anchor="middle" class="lbl">PDF)</text>
+</g>
+<g>
+  <rect x="1390" y="470" width="64" height="64" rx="10" fill="#2a2f38" stroke="#f5a623" stroke-width="2"/>
+  <text x="1422" y="509" text-anchor="middle" class="ico" fill="#f5a623">{ }</text>
+  <text x="1422" y="552" text-anchor="middle" class="lbl">Sign request</text>
+</g>
+<g>
+  <rect x="1610" y="470" width="64" height="64" rx="10" fill="#2a2f38" stroke="#7b61ff" stroke-width="2"/>
+  <text x="1642" y="509" text-anchor="middle" class="ico" fill="#7b61ff">⇄</text>
+  <text x="1642" y="552" text-anchor="middle" class="lbl">OSAKA: process PDF</text>
+</g>
+<g>
+  <rect x="1830" y="470" width="64" height="64" rx="10" fill="#2a2f38" stroke="#f5a623" stroke-width="2"/>
+  <text x="1862" y="509" text-anchor="middle" class="ico" fill="#f5a623">{ }</text>
+  <text x="1862" y="552" text-anchor="middle" class="lbl">Route result</text>
+</g>
+<g>
+  <rect x="2050" y="470" width="64" height="64" rx="10" fill="#2a2f38" stroke="#00a3a3" stroke-width="2"/>
+  <text x="2082" y="509" text-anchor="middle" class="ico" fill="#00a3a3">◇</text>
+  <text x="2082" y="552" text-anchor="middle" class="lbl">By outcome</text>
+</g>
+<g>
+  <rect x="2270" y="270" width="64" height="64" rx="10" fill="#2a2f38" stroke="#00a3a3" stroke-width="2"/>
+  <text x="2302" y="309" text-anchor="middle" class="ico" fill="#00a3a3">◇</text>
+  <text x="2302" y="352" text-anchor="middle" class="lbl">Drive owed?</text>
+</g>
+<g>
+  <rect x="2490" y="170" width="64" height="64" rx="10" fill="#2a2f38" stroke="#1fa463" stroke-width="2"/>
+  <text x="2522" y="209" text-anchor="middle" class="ico" fill="#1fa463">▲</text>
+  <text x="2522" y="252" text-anchor="middle" class="lbl">Find client folder</text>
+</g>
+<g>
+  <rect x="2710" y="170" width="64" height="64" rx="10" fill="#2a2f38" stroke="#f5a623" stroke-width="2"/>
+  <text x="2742" y="209" text-anchor="middle" class="ico" fill="#f5a623">{ }</text>
+  <text x="2742" y="252" text-anchor="middle" class="lbl">Folder exists?</text>
+</g>
+<g>
+  <rect x="2930" y="170" width="64" height="64" rx="10" fill="#2a2f38" stroke="#00a3a3" stroke-width="2"/>
+  <text x="2962" y="209" text-anchor="middle" class="ico" fill="#00a3a3">◇</text>
+  <text x="2962" y="252" text-anchor="middle" class="lbl">Need folder?</text>
+</g>
+<g>
+  <rect x="3150" y="70" width="64" height="64" rx="10" fill="#2a2f38" stroke="#1fa463" stroke-width="2"/>
+  <text x="3182" y="109" text-anchor="middle" class="ico" fill="#1fa463">▲</text>
+  <text x="3182" y="152" text-anchor="middle" class="lbl">Create client</text><text x="3182" y="166" text-anchor="middle" class="lbl">folder</text>
+</g>
+<g>
+  <rect x="3370" y="70" width="64" height="64" rx="10" fill="#2a2f38" stroke="#f5a623" stroke-width="2"/>
+  <text x="3402" y="109" text-anchor="middle" class="ico" fill="#f5a623">{ }</text>
+  <text x="3402" y="152" text-anchor="middle" class="lbl">Use new folder</text>
+</g>
+<g>
+  <rect x="3590" y="170" width="64" height="64" rx="10" fill="#2a2f38" stroke="#1fa463" stroke-width="2"/>
+  <text x="3622" y="209" text-anchor="middle" class="ico" fill="#1fa463">▲</text>
+  <text x="3622" y="252" text-anchor="middle" class="lbl">Upload PDF to</text><text x="3622" y="266" text-anchor="middle" class="lbl">Drive</text>
+</g>
+<g>
+  <rect x="4030" y="270" width="64" height="64" rx="10" fill="#2a2f38" stroke="#00a3a3" stroke-width="2"/>
+  <text x="4062" y="309" text-anchor="middle" class="ico" fill="#00a3a3">◇</text>
+  <text x="4062" y="352" text-anchor="middle" class="lbl">Sheet owed?</text>
+</g>
+<g>
+  <rect x="3810" y="170" width="64" height="64" rx="10" fill="#2a2f38" stroke="#f5a623" stroke-width="2"/>
+  <text x="3842" y="209" text-anchor="middle" class="ico" fill="#f5a623">{ }</text>
+  <text x="3842" y="252" text-anchor="middle" class="lbl">Sign ack: drive</text>
+</g>
+<g>
+  <rect x="4030" y="170" width="64" height="64" rx="10" fill="#2a2f38" stroke="#7b61ff" stroke-width="2"/>
+  <text x="4062" y="209" text-anchor="middle" class="ico" fill="#7b61ff">⇄</text>
+  <text x="4062" y="252" text-anchor="middle" class="lbl">Ack: drive</text>
+</g>
+<g>
+  <rect x="4250" y="170" width="64" height="64" rx="10" fill="#2a2f38" stroke="#f5a623" stroke-width="2"/>
+  <text x="4282" y="209" text-anchor="middle" class="ico" fill="#f5a623">{ }</text>
+  <text x="4282" y="252" text-anchor="middle" class="lbl">Sheet row</text>
+</g>
+<g>
+  <rect x="4470" y="170" width="64" height="64" rx="10" fill="#2a2f38" stroke="#0f9d58" stroke-width="2"/>
+  <text x="4502" y="209" text-anchor="middle" class="ico" fill="#0f9d58">▦</text>
+  <text x="4502" y="252" text-anchor="middle" class="lbl">Append to Sheet</text>
+</g>
+<g>
+  <rect x="5130" y="270" width="64" height="64" rx="10" fill="#2a2f38" stroke="#00a3a3" stroke-width="2"/>
+  <text x="5162" y="309" text-anchor="middle" class="ico" fill="#00a3a3">◇</text>
+  <text x="5162" y="352" text-anchor="middle" class="lbl">Reply owed?</text>
+</g>
+<g>
+  <rect x="4690" y="170" width="64" height="64" rx="10" fill="#2a2f38" stroke="#f5a623" stroke-width="2"/>
+  <text x="4722" y="209" text-anchor="middle" class="ico" fill="#f5a623">{ }</text>
+  <text x="4722" y="252" text-anchor="middle" class="lbl">Sign ack: sheets</text>
+</g>
+<g>
+  <rect x="4910" y="170" width="64" height="64" rx="10" fill="#2a2f38" stroke="#7b61ff" stroke-width="2"/>
+  <text x="4942" y="209" text-anchor="middle" class="ico" fill="#7b61ff">⇄</text>
+  <text x="4942" y="252" text-anchor="middle" class="lbl">Ack: sheets</text>
+</g>
+<g>
+  <rect x="5350" y="170" width="64" height="64" rx="10" fill="#2a2f38" stroke="#f5a623" stroke-width="2"/>
+  <text x="5382" y="209" text-anchor="middle" class="ico" fill="#f5a623">{ }</text>
+  <text x="5382" y="252" text-anchor="middle" class="lbl">Compose reply</text>
+</g>
+<g>
+  <rect x="5570" y="170" width="64" height="64" rx="10" fill="#2a2f38" stroke="#ea4335" stroke-width="2"/>
+  <text x="5602" y="209" text-anchor="middle" class="ico" fill="#ea4335">✉</text>
+  <text x="5602" y="252" text-anchor="middle" class="lbl">Reply to sender</text>
+</g>
+<g>
+  <rect x="6010" y="270" width="64" height="64" rx="10" fill="#2a2f38" stroke="#ea4335" stroke-width="2"/>
+  <text x="6042" y="309" text-anchor="middle" class="ico" fill="#ea4335">✉</text>
+  <text x="6042" y="352" text-anchor="middle" class="lbl">Label: processed</text>
+</g>
+<g>
+  <rect x="5790" y="170" width="64" height="64" rx="10" fill="#2a2f38" stroke="#f5a623" stroke-width="2"/>
+  <text x="5822" y="209" text-anchor="middle" class="ico" fill="#f5a623">{ }</text>
+  <text x="5822" y="252" text-anchor="middle" class="lbl">Sign ack: reply</text>
+</g>
+<g>
+  <rect x="6010" y="170" width="64" height="64" rx="10" fill="#2a2f38" stroke="#7b61ff" stroke-width="2"/>
+  <text x="6042" y="209" text-anchor="middle" class="ico" fill="#7b61ff">⇄</text>
+  <text x="6042" y="252" text-anchor="middle" class="lbl">Ack: reply</text>
+</g>
+<g>
+  <rect x="2270" y="570" width="64" height="64" rx="10" fill="#2a2f38" stroke="#ea4335" stroke-width="2"/>
+  <text x="2302" y="609" text-anchor="middle" class="ico" fill="#ea4335">✉</text>
+  <text x="2302" y="652" text-anchor="middle" class="lbl">Label: quarantine</text>
+</g>
+<g>
+  <rect x="2270" y="770" width="64" height="64" rx="10" fill="#2a2f38" stroke="#f5a623" stroke-width="2"/>
+  <text x="2302" y="809" text-anchor="middle" class="ico" fill="#f5a623">{ }</text>
+  <text x="2302" y="852" text-anchor="middle" class="lbl">Failure notice</text>
+</g>
+<g>
+  <rect x="2490" y="770" width="64" height="64" rx="10" fill="#2a2f38" stroke="#00a3a3" stroke-width="2"/>
+  <text x="2522" y="809" text-anchor="middle" class="ico" fill="#00a3a3">◇</text>
+  <text x="2522" y="852" text-anchor="middle" class="lbl">Sender can fix it?</text>
+</g>
+<g>
+  <rect x="2710" y="670" width="64" height="64" rx="10" fill="#2a2f38" stroke="#ea4335" stroke-width="2"/>
+  <text x="2742" y="709" text-anchor="middle" class="ico" fill="#ea4335">✉</text>
+  <text x="2742" y="752" text-anchor="middle" class="lbl">Reply: file</text><text x="2742" y="766" text-anchor="middle" class="lbl">problem</text>
+</g>
+<g>
+  <rect x="2930" y="770" width="64" height="64" rx="10" fill="#2a2f38" stroke="#ea4335" stroke-width="2"/>
+  <text x="2962" y="809" text-anchor="middle" class="ico" fill="#ea4335">✉</text>
+  <text x="2962" y="852" text-anchor="middle" class="lbl">Label: failed</text>
+</g>
+<g>
+  <rect x="3150" y="670" width="64" height="64" rx="10" fill="#2a2f38" stroke="#f5a623" stroke-width="2"/>
+  <text x="3182" y="709" text-anchor="middle" class="ico" fill="#f5a623">{ }</text>
+  <text x="3182" y="752" text-anchor="middle" class="lbl">Operator alert</text>
+</g>
+<g>
+  <rect x="3370" y="670" width="64" height="64" rx="10" fill="#2a2f38" stroke="#ea4335" stroke-width="2"/>
+  <text x="3402" y="709" text-anchor="middle" class="ico" fill="#ea4335">✉</text>
+  <text x="3402" y="752" text-anchor="middle" class="lbl">Email operator</text>
+</g>
+</svg>
