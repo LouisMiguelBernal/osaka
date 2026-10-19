@@ -1,0 +1,16 @@
+node_modules/
+.next/
+coverage/
+*.tsbuildinfo
+next-env.d.ts
+
+# Secrets (templates live in app/config/env.template and n8n/env.template)
+.env
+.env.*
+**/.env
+**/.env.*
+
+# Runtime data
+/app/storage/
+/inbox/
+/backups/
