@@ -1,0 +1,70 @@
+# OSAKA local stack: n8n (orchestrator) + Postgres (OSAKA app database).
+# Ollama and the OSAKA Next.js app run on the host; containers reach them via host.docker.internal.
+#
+#   (cd ../app && npm run setup:env)   # generates .env with secrets
+#   docker compose up -d
+name: osaka-intake
+
+services:
+  db:
+    image: postgres@sha256:be01cf82fc7dbba824acf0a82e150b4b360f3ff93c6631d7844af431e841a95c # postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${OSAKA_DB_PASSWORD:?set OSAKA_DB_PASSWORD in .env}
+      POSTGRES_DB: osaka
+    ports:
+      - "127.0.0.1:${OSAKA_DB_PORT:-55432}:5432" # localhost only, never exposed to the LAN
+    volumes:
+      - osaka-db:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d osaka"]
+      interval: 5s
+      retries: 10
+
+  n8n:
+    # n8n 2.39.8, pinned by digest (reproducible; no registry pull needed)
+    image: docker.n8n.io/n8nio/n8n@sha256:b73045abaddb40cb4024e86eea1b1f69093501a7339f685a4cd486b7743d23ae
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:${N8N_PORT:-5678}:5678"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    environment:
+      N8N_ENCRYPTION_KEY: ${N8N_ENCRYPTION_KEY:?set N8N_ENCRYPTION_KEY in .env}
+      GENERIC_TIMEZONE: ${TZ:-Asia/Manila}
+      TZ: ${TZ:-Asia/Manila}
+      N8N_SECURE_COOKIE: "false" # localhost over http
+      N8N_DIAGNOSTICS_ENABLED: "false"
+      N8N_LOG_LEVEL: ${N8N_LOG_LEVEL:-info}
+      N8N_PERSONALIZATION_ENABLED: "false"
+      N8N_BLOCK_ENV_ACCESS_IN_NODE: "false" # workflows read OSAKA_* below via $env
+      NODE_FUNCTION_ALLOW_BUILTIN: crypto # Code nodes sign ingest requests (HMAC) and hash attachments
+      N8N_RUNNERS_ENABLED: "true"
+      WEBHOOK_URL: http://localhost:${N8N_PORT:-5678}/
+      # Local-folder intake: n8n 2.x disables the Local File Trigger by default. Re-enable it only;
+      # Execute Command stays excluded. File access is confined to the drop folder.
+      NODES_EXCLUDE: '["n8n-nodes-base.executeCommand"]'
+      N8N_RESTRICT_FILE_ACCESS_TO: /inbox
+      OSAKA_LOCAL_SENDER: ${OSAKA_LOCAL_SENDER:-local-drop@osaka.local}
+      # Execution history (may contain masked extraction summaries) is pruned after 72 h.
+      EXECUTIONS_DATA_PRUNE: "true"
+      EXECUTIONS_DATA_MAX_AGE: "72"
+      # "none" leaves finished runs stuck as "running" in n8n 2.39; keep them and let pruning remove them.
+      EXECUTIONS_DATA_SAVE_ON_SUCCESS: "all"
+      EXECUTIONS_DATA_SAVE_ON_ERROR: "all"
+      # Workflow config (referenced as $env.* inside nodes)
+      OSAKA_BASE_URL: ${OSAKA_BASE_URL:-http://host.docker.internal:3030}
+      OSAKA_INGEST_SECRET: ${OSAKA_INGEST_SECRET:?set OSAKA_INGEST_SECRET in .env}
+      OSAKA_OPERATOR_EMAIL: ${OSAKA_OPERATOR_EMAIL:-}
+      OSAKA_BOT_EMAIL: ${OSAKA_BOT_EMAIL:-}
+      OSAKA_DRIVE_ROOT_FOLDER_ID: ${OSAKA_DRIVE_ROOT_FOLDER_ID:-}
+      OSAKA_SHEET_ID: ${OSAKA_SHEET_ID:-}
+    volumes:
+      - n8n-data:/home/node/.n8n
+      - ./workflows:/workflows:ro
+      - ../inbox:/inbox
+
+volumes:
+  osaka-db:
+  n8n-data:

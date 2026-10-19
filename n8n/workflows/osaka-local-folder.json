@@ -1,0 +1,495 @@
+{
+  "id": "KWJU14wZZdSc2Ru7",
+  "name": "OSAKA — Local folder intake",
+  "nodes": [
+    {
+      "id": "609f6c47-6487-4fe5-e708-65ba2cf60dc9",
+      "typeVersion": 1,
+      "parameters": {
+        "triggerOn": "folder",
+        "path": "/inbox",
+        "events": [
+          "add"
+        ],
+        "options": {
+          "usePolling": true,
+          "awaitWriteFinish": true,
+          "depth": 0,
+          "ignored": "**/results/**"
+        }
+      },
+      "name": "Watch inbox",
+      "type": "n8n-nodes-base.localFileTrigger",
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "id": "4dd819ea-161c-1155-4c40-95601c27915a",
+      "typeVersion": 2,
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const senderOf = (fileName) => {\n  const m = /^([^\\s_]+@[^\\s_]+\\.[a-z]{2,})__(.+)$/i.exec(fileName);\n  return (m ? m[1] : ($env.OSAKA_LOCAL_SENDER || 'local-drop@osaka.local')).toLowerCase();\n};\nconst out = [];\nfor (const it of $input.all()) {\n  const p = String(it.json.path || '');\n  const fileName = p.split('/').pop();\n  if (!/\\.pdf$/i.test(fileName)) continue;\n  out.push({ json: { path: p, fileName, senderEmail: senderOf(fileName), via: 'watch' } });\n}\nreturn out;"
+      },
+      "name": "Only PDFs",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        220,
+        0
+      ]
+    },
+    {
+      "id": "26315a9b-c5a1-f4c6-0ffd-8d8aaf381374",
+      "typeVersion": 1,
+      "parameters": {
+        "operation": "read",
+        "fileSelector": "={{ $json.path }}",
+        "options": {
+          "dataPropertyName": "file"
+        }
+      },
+      "name": "Read PDF",
+      "type": "n8n-nodes-base.readWriteFile",
+      "position": [
+        440,
+        0
+      ],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000
+    },
+    {
+      "id": "02133457-d432-963e-0526-a0aec6561b02",
+      "typeVersion": 2,
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "return $input.all().map((it, i) => ({ json: $('Only PDFs').all()[i].json, binary: it.binary }));"
+      },
+      "name": "Attach file info",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        660,
+        0
+      ]
+    },
+    {
+      "id": "319c81c9-38c3-092a-a5d4-350be7c8ff9a",
+      "typeVersion": 1.2,
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 10
+            }
+          ]
+        }
+      },
+      "name": "Sweeper (every 10 min)",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "position": [
+        0,
+        260
+      ]
+    },
+    {
+      "id": "d28bdfa9-bd04-a312-f7c5-de001691b955",
+      "typeVersion": 1,
+      "parameters": {
+        "operation": "read",
+        "fileSelector": "/inbox/*.pdf",
+        "options": {
+          "dataPropertyName": "file"
+        }
+      },
+      "name": "Read all PDFs",
+      "type": "n8n-nodes-base.readWriteFile",
+      "position": [
+        220,
+        260
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "id": "a7eaa471-6468-bdec-7fff-10d5c067bb7b",
+      "typeVersion": 2,
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const senderOf = (fileName) => {\n  const m = /^([^\\s_]+@[^\\s_]+\\.[a-z]{2,})__(.+)$/i.exec(fileName);\n  return (m ? m[1] : ($env.OSAKA_LOCAL_SENDER || 'local-drop@osaka.local')).toLowerCase();\n};\nreturn $input.all()\n  .filter((it) => it.binary?.file)\n  .map((it) => {\n    const fileName = it.binary.file.fileName || it.json.fileName;\n    return { json: { path: '/inbox/' + fileName, fileName, senderEmail: senderOf(fileName), via: 'sweep' }, binary: it.binary };\n  });"
+      },
+      "name": "Sweep file info",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        440,
+        260
+      ]
+    },
+    {
+      "id": "e26138c5-69e2-6c46-e315-3a41c5651fbd",
+      "typeVersion": 1,
+      "parameters": {},
+      "name": "Queue",
+      "type": "n8n-nodes-base.noOp",
+      "position": [
+        880,
+        120
+      ]
+    },
+    {
+      "id": "c0b066df-1737-be5c-8c59-0a2cc4a6ae76",
+      "typeVersion": 3,
+      "parameters": {
+        "batchSize": 1,
+        "options": {}
+      },
+      "name": "One at a time",
+      "type": "n8n-nodes-base.splitInBatches",
+      "position": [
+        1100,
+        120
+      ]
+    },
+    {
+      "id": "b06893a7-c9f3-58f0-2d3e-862fcf2b354f",
+      "typeVersion": 1,
+      "parameters": {},
+      "name": "All done",
+      "type": "n8n-nodes-base.noOp",
+      "position": [
+        1320,
+        -100
+      ]
+    },
+    {
+      "id": "85a61b7a-132d-6f0a-8701-9c1b61266525",
+      "typeVersion": 2,
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const crypto = require('crypto');\nconst sign = (parts) => {\n  const ts = String(Math.floor(Date.now() / 1000));\n  const sig = crypto.createHmac('sha256', $env.OSAKA_INGEST_SECRET).update(['v1', ts, ...parts].join('\\n')).digest('hex');\n  return { ts, signature: 'sha256=' + sig };\n};\n// Signed immediately before sending (±300 s window), one file at a time.\nconst src = $input.first().json;\nconst buf = await this.helpers.getBinaryDataBuffer(0, 'file');\nconst sha = crypto.createHash('sha256').update(buf).digest('hex');\nconst messageId = 'local:' + sha;\nreturn [{ json: { ...src, messageId, senderAuth: 'pass', ...sign([messageId, sha, src.senderEmail, 'pass', 'local']) }, binary: $input.first().binary }];"
+      },
+      "name": "Sign request (local)",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        1320,
+        120
+      ]
+    },
+    {
+      "id": "33b82f75-e883-aa99-0f48-c8ffddf803a0",
+      "typeVersion": 4.2,
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.OSAKA_BASE_URL }}/api/ingest/process",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-osaka-timestamp",
+              "value": "={{ $json.ts }}"
+            },
+            {
+              "name": "x-osaka-signature",
+              "value": "={{ $json.signature }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "parameterType": "formBinaryData",
+              "name": "file",
+              "inputDataFieldName": "file"
+            },
+            {
+              "name": "messageId",
+              "value": "={{ $json.messageId }}"
+            },
+            {
+              "name": "senderEmail",
+              "value": "={{ $json.senderEmail }}"
+            },
+            {
+              "name": "senderAuth",
+              "value": "pass"
+            },
+            {
+              "name": "source",
+              "value": "local"
+            },
+            {
+              "name": "subject",
+              "value": "=Local drop: {{ $json.fileName }}"
+            },
+            {
+              "name": "fileName",
+              "value": "={{ $json.fileName }}"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 300000,
+          "response": {
+            "response": {
+              "fullResponse": true,
+              "neverError": true
+            }
+          }
+        }
+      },
+      "name": "OSAKA: process PDF",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        1540,
+        120
+      ],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000
+    },
+    {
+      "id": "4f9534e7-b92f-0e6d-ca72-b00144d78426",
+      "typeVersion": 2,
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const src = $('Sign request (local)').first().json;\nconst res = $input.first().json;\nconst s = res.body || {};\nconst ok = res.statusCode === 200;\nconst result = ok\n  ? { file: src.fileName, status: s.status, duplicate: s.duplicate, docType: s.docTypeLabel, confidence: s.confidence,\n      fields: Object.fromEntries((s.fields || []).map((f) => [f.label, f.value])),\n      missing: (s.missingFields || []).map((f) => f.label), warnings: s.warnings, reason: s.reason,\n      dashboard: String(s.dashboardUrl || '').replace('host.docker.internal', 'localhost'),\n      checkedAt: new Date().toISOString() }\n  : { file: src.fileName, status: 'error', http: res.statusCode, error: s.error || 'OSAKA app unreachable — is npm run dev running on :3030?',\n      retry: 'The sweeper retries this file within 10 minutes.', checkedAt: new Date().toISOString() };\n// The sweeper re-checks finished files every 10 min; don't rewrite their result file each time.\nconst write = !(src.via === 'sweep' && ok && s.duplicate && s.status !== 'failed');\nconst name = src.fileName.replace(/\\.pdf$/i, '') + '.json';\nreturn [{ json: { ...result, write }, binary: { data: { data: Buffer.from(JSON.stringify(result, null, 2)).toString('base64'), mimeType: 'application/json', fileName: name } } }];"
+      },
+      "name": "Result file",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        1760,
+        120
+      ]
+    },
+    {
+      "id": "9395b067-acdc-4665-2f52-d1ced72d6f11",
+      "typeVersion": 2.2,
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "efb2a684-e4af-b7d5-5e61-47fbe5a332ee",
+              "leftValue": "={{ $json.write }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "name": "New result?",
+      "type": "n8n-nodes-base.if",
+      "position": [
+        1980,
+        120
+      ]
+    },
+    {
+      "id": "d1fe9032-cf33-277c-4ac2-740559c02069",
+      "typeVersion": 1,
+      "parameters": {
+        "operation": "write",
+        "fileName": "=/inbox/results/{{ $binary.data.fileName }}",
+        "dataPropertyName": "data",
+        "options": {}
+      },
+      "name": "Write result JSON",
+      "type": "n8n-nodes-base.readWriteFile",
+      "position": [
+        2200,
+        40
+      ],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000
+    }
+  ],
+  "connections": {
+    "Watch inbox": {
+      "main": [
+        [
+          {
+            "node": "Only PDFs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Only PDFs": {
+      "main": [
+        [
+          {
+            "node": "Read PDF",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read PDF": {
+      "main": [
+        [
+          {
+            "node": "Attach file info",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sweeper (every 10 min)": {
+      "main": [
+        [
+          {
+            "node": "Read all PDFs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read all PDFs": {
+      "main": [
+        [
+          {
+            "node": "Sweep file info",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Attach file info": {
+      "main": [
+        [
+          {
+            "node": "Queue",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sweep file info": {
+      "main": [
+        [
+          {
+            "node": "Queue",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Queue": {
+      "main": [
+        [
+          {
+            "node": "One at a time",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "One at a time": {
+      "main": [
+        [
+          {
+            "node": "All done",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Sign request (local)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sign request (local)": {
+      "main": [
+        [
+          {
+            "node": "OSAKA: process PDF",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OSAKA: process PDF": {
+      "main": [
+        [
+          {
+            "node": "Result file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Result file": {
+      "main": [
+        [
+          {
+            "node": "New result?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "New result?": {
+      "main": [
+        [
+          {
+            "node": "Write result JSON",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "One at a time",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Write result JSON": {
+      "main": [
+        [
+          {
+            "node": "One at a time",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "errorWorkflow": "aGN2eSo0J-tIR8Qy"
+  },
+  "pinData": {}
+}

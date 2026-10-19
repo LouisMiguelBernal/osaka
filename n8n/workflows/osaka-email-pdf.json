@@ -1,0 +1,1592 @@
+{
+  "id": "AaMeXzQyRFMcZr5I",
+  "name": "OSAKA — Email PDF intake",
+  "nodes": [
+    {
+      "id": "44506f25-acd3-00f8-7abd-9c57d003092d",
+      "typeVersion": 1.2,
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "simple": false,
+        "filters": {
+          "q": "has:attachment label:inbox -label:osaka-processed -label:osaka-failed -label:osaka-quarantine -from:me",
+          "readStatus": "both"
+        },
+        "options": {
+          "downloadAttachments": true,
+          "dataPropertyAttachmentsPrefixName": "attachment_"
+        }
+      },
+      "name": "Gmail Trigger",
+      "type": "n8n-nodes-base.gmailTrigger",
+      "position": [
+        0,
+        300
+      ],
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "",
+          "name": "OSAKA Gmail"
+        }
+      }
+    },
+    {
+      "id": "9491712e-203a-0423-5dce-e38e89b5e64a",
+      "typeVersion": 2,
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "// One output item per PDF attachment. Bot's own mail is dropped (no reply loops).\n// senderAuth comes from Gmail's Authentication-Results header (SPF/DKIM/DMARC).\nconst bot = ($env.OSAKA_BOT_EMAIL || '').toLowerCase();\nconst items = $input.all();\nconst out = [];\nfor (let i = 0; i < items.length; i++) {\n  const j = items[i].json;\n  const from = j.from?.value?.[0] ?? {};\n  const senderEmail = String(from.address || '').toLowerCase();\n  if (!senderEmail || senderEmail === bot) continue;\n  const headers = j.headers || {};\n  const authHeader = String(headers['authentication-results'] || headers['Authentication-Results'] || '');\n  const dmarcFail = /dmarc=fail/i.test(authHeader);\n  const senderAuth = !dmarcFail && /(dmarc|dkim|spf)=pass/i.test(authHeader) ? 'pass' : /(dmarc|dkim|spf)=(fail|softfail)/i.test(authHeader) ? 'fail' : 'none';\n  const base = { messageId: j.id, threadId: j.threadId, senderEmail, senderName: from.name || '', subject: j.subject || '', senderAuth };\n  const binary = items[i].binary || {};\n  const pdfKeys = Object.keys(binary).filter((k) => binary[k].mimeType === 'application/pdf' || /\\.pdf$/i.test(binary[k].fileName || ''));\n  if (pdfKeys.length === 0) { out.push({ json: { ...base, noPdf: true } }); continue; }\n  for (const k of pdfKeys) {\n    out.push({ json: { ...base, noPdf: false, fileName: binary[k].fileName || 'attachment.pdf' }, binary: { file: binary[k] } });\n  }\n}\nreturn out;"
+      },
+      "name": "Prepare PDFs",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        220,
+        300
+      ]
+    },
+    {
+      "id": "35bae2b2-2ab2-988b-5660-965d043065e5",
+      "typeVersion": 2.1,
+      "parameters": {
+        "resource": "label",
+        "operation": "getAll",
+        "returnAll": true
+      },
+      "name": "Get labels",
+      "type": "n8n-nodes-base.gmail",
+      "position": [
+        440,
+        300
+      ],
+      "executeOnce": true,
+      "alwaysOutputData": true,
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "",
+          "name": "OSAKA Gmail"
+        }
+      }
+    },
+    {
+      "id": "c49b422d-dc0c-0a48-f47c-f6e55d819184",
+      "typeVersion": 2,
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "// Gmail's addLabels needs label IDs; resolve them once per run by name.\nconst byName = Object.fromEntries($('Get labels').all().map((l) => [l.json.name, l.json.id]));\nconst labelIds = { processed: byName['OSAKA/Processed'], failed: byName['OSAKA/Failed'], quarantine: byName['OSAKA/Quarantine'] };\nconst missing = Object.entries(labelIds).filter(([, v]) => !v).map(([k]) => k);\nif (missing.length) throw new Error('Create these Gmail labels first: ' + missing.map((m) => 'OSAKA/' + m[0].toUpperCase() + m.slice(1)).join(', '));\nreturn $('Prepare PDFs').all().map((it) => ({ json: { ...it.json, labelIds }, binary: it.binary }));"
+      },
+      "name": "Label map + items",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        660,
+        300
+      ]
+    },
+    {
+      "id": "b205d160-079c-9220-67e0-754db0ae65a4",
+      "typeVersion": 3,
+      "parameters": {
+        "batchSize": 1,
+        "options": {}
+      },
+      "name": "One at a time",
+      "type": "n8n-nodes-base.splitInBatches",
+      "position": [
+        880,
+        300
+      ]
+    },
+    {
+      "id": "a97b2bb8-8a5b-91c4-3917-27094735ab04",
+      "typeVersion": 2.2,
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "38a6a7fa-ba66-a4a1-99ae-d6af1d134ea4",
+              "leftValue": "={{ $json.noPdf }}",
+              "rightValue": false,
+              "operator": {
+                "type": "boolean",
+                "operation": "false",
+                "singleValue": true
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "name": "Has PDF?",
+      "type": "n8n-nodes-base.if",
+      "position": [
+        1100,
+        300
+      ]
+    },
+    {
+      "id": "97ea8cd0-362b-9e59-cfad-35626f14651d",
+      "typeVersion": 2.1,
+      "parameters": {
+        "operation": "reply",
+        "messageId": "={{ $json.messageId }}",
+        "emailType": "html",
+        "message": "=<p>Hi{{ $json.senderName ? ' ' + $json.senderName.split(' ')[0] : '' }},</p><p>Thanks for your email. We couldn't find a PDF attached, so nothing was processed. Please reply with your document attached as a PDF.</p><p>— OSAKA</p>",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "name": "Reply: no PDF",
+      "type": "n8n-nodes-base.gmail",
+      "position": [
+        1320,
+        560
+      ],
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "",
+          "name": "OSAKA Gmail"
+        }
+      },
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000
+    },
+    {
+      "id": "8c67e102-c7ec-a28c-9f00-50802c647d29",
+      "typeVersion": 2.1,
+      "parameters": {
+        "operation": "addLabels",
+        "messageId": "={{ $('Has PDF?').item.json.messageId }}",
+        "labelIds": "={{ [$('Has PDF?').item.json.labelIds.failed] }}"
+      },
+      "name": "Label: failed (no PDF)",
+      "type": "n8n-nodes-base.gmail",
+      "position": [
+        1540,
+        560
+      ],
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "",
+          "name": "OSAKA Gmail"
+        }
+      },
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000
+    },
+    {
+      "id": "55468fcb-bdec-7f7b-5feb-c1a79813e453",
+      "typeVersion": 2,
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const crypto = require('crypto');\nconst sign = (parts) => {\n  const ts = String(Math.floor(Date.now() / 1000));\n  const sig = crypto.createHmac('sha256', $env.OSAKA_INGEST_SECRET).update(['v1', ts, ...parts].join('\\n')).digest('hex');\n  return { ts, signature: 'sha256=' + sig };\n};\nconst j = $json;\nconst buf = await this.helpers.getBinaryDataBuffer(0, 'file');\nconst sha = crypto.createHash('sha256').update(buf).digest('hex');\nreturn [{ json: { ...j, ...sign([j.messageId, sha, j.senderEmail, j.senderAuth]) }, binary: $input.first().binary }];"
+      },
+      "name": "Sign request",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        1320,
+        200
+      ]
+    },
+    {
+      "id": "a12568d7-f8b8-14bd-0355-0a24774625d0",
+      "typeVersion": 4.2,
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.OSAKA_BASE_URL }}/api/ingest/process",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-osaka-timestamp",
+              "value": "={{ $json.ts }}"
+            },
+            {
+              "name": "x-osaka-signature",
+              "value": "={{ $json.signature }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "parameterType": "formBinaryData",
+              "name": "file",
+              "inputDataFieldName": "file"
+            },
+            {
+              "name": "messageId",
+              "value": "={{ $json.messageId }}"
+            },
+            {
+              "name": "threadId",
+              "value": "={{ $json.threadId }}"
+            },
+            {
+              "name": "senderEmail",
+              "value": "={{ $json.senderEmail }}"
+            },
+            {
+              "name": "senderName",
+              "value": "={{ $json.senderName }}"
+            },
+            {
+              "name": "senderAuth",
+              "value": "={{ $json.senderAuth }}"
+            },
+            {
+              "name": "subject",
+              "value": "={{ $json.subject }}"
+            },
+            {
+              "name": "fileName",
+              "value": "={{ $json.fileName }}"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 300000,
+          "response": {
+            "response": {
+              "fullResponse": true,
+              "neverError": true
+            }
+          }
+        }
+      },
+      "name": "OSAKA: process PDF",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        1540,
+        200
+      ]
+    },
+    {
+      "id": "e9a4f9a2-35ff-c53a-2355-ab21bab41919",
+      "typeVersion": 2,
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "// Normalise the OSAKA response and decide which side effects are still owed.\n// fanout flags come from the DB, so a retried execution never repeats a reply.\nconst req = $('Sign request').item;\nconst res = $json;\nif (res.statusCode !== 200 || !res.body?.extractionId) {\n  return [{ json: { route: 'transport_error', http: res.statusCode, error: res.body?.error || 'no response', email: req.json }, binary: req.binary }];\n}\nconst s = res.body;\nconst done = s.fanout || {};\nconst route = s.status === 'needs_review' || s.status === 'approved' ? 'processed' : s.status === 'quarantined' ? 'quarantined' : 'failed';\nreturn [{ json: { ...s, route, email: req.json, needDrive: !!s.drive && !done.drive, needSheet: !!s.sheet && !done.sheets, needReply: !done.reply }, binary: req.binary }];"
+      },
+      "name": "Route result",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        1760,
+        200
+      ]
+    },
+    {
+      "id": "4a482532-007e-c445-2188-5e5837c9dc1e",
+      "typeVersion": 3.2,
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "combinator": "and",
+                "conditions": [
+                  {
+                    "id": "07eae725-22cb-1c4d-ae3f-fde8fb23d134",
+                    "leftValue": "={{ $json.route }}",
+                    "rightValue": "processed",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ]
+              },
+              "renameOutput": true,
+              "outputKey": "processed"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "combinator": "and",
+                "conditions": [
+                  {
+                    "id": "e9afeb42-b4ae-2ec3-89f9-88c971d5bf2d",
+                    "leftValue": "={{ $json.route }}",
+                    "rightValue": "quarantined",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ]
+              },
+              "renameOutput": true,
+              "outputKey": "quarantined"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "combinator": "and",
+                "conditions": [
+                  {
+                    "id": "b249d2f9-d06c-2a10-ce75-628b07cc808c",
+                    "leftValue": "={{ $json.route }}",
+                    "rightValue": "failed",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ]
+              },
+              "renameOutput": true,
+              "outputKey": "failed"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "combinator": "and",
+                "conditions": [
+                  {
+                    "id": "3ce3f1b9-5955-0d53-1fd5-e787d3987c14",
+                    "leftValue": "={{ $json.route }}",
+                    "rightValue": "transport_error",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ]
+              },
+              "renameOutput": true,
+              "outputKey": "transport_error"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "name": "By outcome",
+      "type": "n8n-nodes-base.switch",
+      "position": [
+        1980,
+        200
+      ]
+    },
+    {
+      "id": "bea5d2ab-de91-b1c8-b5d4-41e14b7ffd1b",
+      "typeVersion": 2.2,
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "f3064901-fb90-b96a-2f6d-481037529223",
+              "leftValue": "={{ $json.needDrive && !!$env.OSAKA_DRIVE_ROOT_FOLDER_ID }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "name": "Drive owed?",
+      "type": "n8n-nodes-base.if",
+      "position": [
+        2200,
+        0
+      ]
+    },
+    {
+      "id": "61293e77-3ec4-422f-e607-03864f1566d4",
+      "typeVersion": 3,
+      "parameters": {
+        "resource": "fileFolder",
+        "searchMethod": "query",
+        "queryString": "=mimeType = 'application/vnd.google-apps.folder' and name = '{{ $json.drive.folderPath[1].replace(/'/g, \"\\\\'\") }}' and '{{ $env.OSAKA_DRIVE_ROOT_FOLDER_ID }}' in parents and trashed = false",
+        "limit": 1,
+        "filter": {},
+        "options": {}
+      },
+      "name": "Find client folder",
+      "type": "n8n-nodes-base.googleDrive",
+      "position": [
+        2420,
+        -100
+      ],
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "",
+          "name": "OSAKA Google Drive"
+        }
+      },
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000
+    },
+    {
+      "id": "8c9aa1c6-6c01-fd60-8249-73b3804a5d36",
+      "typeVersion": 2,
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const found = $input.first().json?.id;\nconst s = $('Route result').item;\nreturn [{ json: { ...s.json, folderId: found || null }, binary: s.binary }];"
+      },
+      "name": "Folder exists?",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        2640,
+        -100
+      ]
+    },
+    {
+      "id": "af6579c9-878e-9b46-60f3-56b8dbe92acc",
+      "typeVersion": 2.2,
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "4cab1d86-2911-17d1-35a1-af1e50a77f68",
+              "leftValue": "={{ $json.folderId }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "empty",
+                "singleValue": true
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "name": "Need folder?",
+      "type": "n8n-nodes-base.if",
+      "position": [
+        2860,
+        -100
+      ]
+    },
+    {
+      "id": "66a00633-c960-031a-8934-32fba7bc9a12",
+      "typeVersion": 3,
+      "parameters": {
+        "resource": "folder",
+        "name": "={{ $json.drive.folderPath[1] }}",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $env.OSAKA_DRIVE_ROOT_FOLDER_ID }}"
+        },
+        "options": {}
+      },
+      "name": "Create client folder",
+      "type": "n8n-nodes-base.googleDrive",
+      "position": [
+        3080,
+        -200
+      ],
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "",
+          "name": "OSAKA Google Drive"
+        }
+      },
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000
+    },
+    {
+      "id": "0ea97d96-9829-a1c4-cae4-e1219707d7a2",
+      "typeVersion": 2,
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const s = $('Folder exists?').item;\nreturn [{ json: { ...s.json, folderId: $json.id }, binary: s.binary }];"
+      },
+      "name": "Use new folder",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        3300,
+        -200
+      ]
+    },
+    {
+      "id": "474fefb1-3fd3-4e7f-7f9e-40df6246bd6d",
+      "typeVersion": 3,
+      "parameters": {
+        "inputDataFieldName": "file",
+        "name": "={{ $json.drive.fileName }}",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $json.folderId }}"
+        },
+        "options": {}
+      },
+      "name": "Upload PDF to Drive",
+      "type": "n8n-nodes-base.googleDrive",
+      "position": [
+        3520,
+        -100
+      ],
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "",
+          "name": "OSAKA Google Drive"
+        }
+      },
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000
+    },
+    {
+      "id": "da47d4b3-f8d7-7c01-5d05-febfb17a735b",
+      "typeVersion": 2.2,
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "17ac812f-2323-58ab-b4ae-40885479faef",
+              "leftValue": "={{ $('Route result').item.json.needSheet && !!$env.OSAKA_SHEET_ID }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "name": "Sheet owed?",
+      "type": "n8n-nodes-base.if",
+      "position": [
+        3960,
+        0
+      ]
+    },
+    {
+      "id": "0a802b35-68b9-90f0-b07c-5f621056b864",
+      "typeVersion": 2,
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const crypto = require('crypto');\nconst sign = (parts) => {\n  const ts = String(Math.floor(Date.now() / 1000));\n  const sig = crypto.createHmac('sha256', $env.OSAKA_INGEST_SECRET).update(['v1', ts, ...parts].join('\\n')).digest('hex');\n  return { ts, signature: 'sha256=' + sig };\n};\nconst s = $('Route result').item.json;\nconst ref = $('Upload PDF to Drive').item.json.id;\nreturn { json: { extractionId: s.extractionId, target: 'drive', ref, ...sign([s.extractionId, 'drive', String(ref)]) } };"
+      },
+      "name": "Sign ack: drive",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        3740,
+        -100
+      ]
+    },
+    {
+      "id": "474ff3d1-5556-916e-fc67-77d7b6074de5",
+      "typeVersion": 4.2,
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.OSAKA_BASE_URL }}/api/ingest/fanout-ack",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-osaka-timestamp",
+              "value": "={{ $json.ts }}"
+            },
+            {
+              "name": "x-osaka-signature",
+              "value": "={{ $json.signature }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ extractionId: $json.extractionId, target: $json.target, ref: $json.ref }) }}",
+        "options": {}
+      },
+      "name": "Ack: drive",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        3960,
+        -100
+      ],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000
+    },
+    {
+      "id": "fda33434-9fee-03bc-c01f-dd3bab89ce37",
+      "typeVersion": 2,
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "return [{ json: $('Route result').item.json.sheet.row }];"
+      },
+      "name": "Sheet row",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        4180,
+        -100
+      ]
+    },
+    {
+      "id": "0dd2652f-b950-8f50-d0ea-10dce2301d01",
+      "typeVersion": 4.5,
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $env.OSAKA_SHEET_ID }}"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "name",
+          "value": "={{ $('Route result').item.json.sheet.tab }}"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [],
+          "schema": []
+        },
+        "options": {
+          "handlingExtraData": "insertInNewColumn"
+        }
+      },
+      "name": "Append to Sheet",
+      "type": "n8n-nodes-base.googleSheets",
+      "position": [
+        4400,
+        -100
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "",
+          "name": "OSAKA Google Sheets"
+        }
+      },
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000
+    },
+    {
+      "id": "67cec483-84af-da10-7002-a3d2c458f0d6",
+      "typeVersion": 2.2,
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "8147dd84-6b33-6664-ac7e-7ee0bb409560",
+              "leftValue": "={{ $('Route result').item.json.needReply }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "name": "Reply owed?",
+      "type": "n8n-nodes-base.if",
+      "position": [
+        5060,
+        0
+      ]
+    },
+    {
+      "id": "11fcc166-e246-4c79-e5f8-7f3cc7646dfb",
+      "typeVersion": 2,
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const crypto = require('crypto');\nconst sign = (parts) => {\n  const ts = String(Math.floor(Date.now() / 1000));\n  const sig = crypto.createHmac('sha256', $env.OSAKA_INGEST_SECRET).update(['v1', ts, ...parts].join('\\n')).digest('hex');\n  return { ts, signature: 'sha256=' + sig };\n};\nconst s = $('Route result').item.json;\nconst ref = true;\nreturn { json: { extractionId: s.extractionId, target: 'sheets', ref, ...sign([s.extractionId, 'sheets', String(ref)]) } };"
+      },
+      "name": "Sign ack: sheets",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        4620,
+        -100
+      ]
+    },
+    {
+      "id": "3637dc71-d3fa-3efc-a100-ef67517e990c",
+      "typeVersion": 4.2,
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.OSAKA_BASE_URL }}/api/ingest/fanout-ack",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-osaka-timestamp",
+              "value": "={{ $json.ts }}"
+            },
+            {
+              "name": "x-osaka-signature",
+              "value": "={{ $json.signature }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ extractionId: $json.extractionId, target: $json.target, ref: $json.ref }) }}",
+        "options": {}
+      },
+      "name": "Ack: sheets",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        4840,
+        -100
+      ],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000
+    },
+    {
+      "id": "e7f1bb6f-241e-9016-3928-8f7bae4c6afb",
+      "typeVersion": 2,
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "// Masked summary for the sender. No dashboard link: localhost means nothing to a client.\nconst s = $('Route result').item.json;\nconst esc = (v) => String(v ?? '').replace(/[&<>\"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '\"': '&quot;' }[c]));\nconst first = (s.sender?.name || '').split(' ')[0];\nconst rows = s.fields.filter((f) => f.value != null).map((f) => '<tr><td style=\"padding:4px 12px 4px 0;color:#475569\">' + esc(f.label) + '</td><td style=\"padding:4px 0\"><b>' + esc(f.value) + '</b></td></tr>').join('');\nconst missing = s.missingFields.length ? '<p>We could not find these in the document — reply with them when you can:</p><ul>' + s.missingFields.map((f) => '<li>' + esc(f.label) + '</li>').join('') + '</ul>' : '';\nconst body = s.docType === 'other'\n  ? '<p>We received <b>' + esc(s.email.fileName) + '</b>. It doesn\\'t look like an intake form, tax return or financial statement, so a team member will review it by hand.</p>'\n  : '<p>We received your <b>' + esc(s.docTypeLabel.toLowerCase()) + '</b> (' + esc(s.email.fileName) + ') and read the following:</p><table style=\"border-collapse:collapse;font-size:14px\">' + rows + '</table>' + missing + '<p>A team member will review this before it is added to your file. Reply to this email if anything above is wrong.</p>';\nreturn [{ json: { html: '<div style=\"font-family:Segoe UI,Arial,sans-serif;color:#022C22\"><p>Hi' + (first ? ' ' + esc(first) : '') + ',</p>' + body + '<p>— OSAKA</p></div>' } }];"
+      },
+      "name": "Compose reply",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        5280,
+        -100
+      ]
+    },
+    {
+      "id": "badfe1b3-a4dc-f9f0-b06c-cad8e9c00940",
+      "typeVersion": 2.1,
+      "parameters": {
+        "operation": "reply",
+        "messageId": "={{ $('Route result').item.json.email.messageId }}",
+        "emailType": "html",
+        "message": "={{ $json.html }}",
+        "options": {
+          "appendAttribution": false,
+          "replyToSenderOnly": true
+        }
+      },
+      "name": "Reply to sender",
+      "type": "n8n-nodes-base.gmail",
+      "position": [
+        5500,
+        -100
+      ],
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "",
+          "name": "OSAKA Gmail"
+        }
+      },
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000
+    },
+    {
+      "id": "dfcdb927-dd7c-458b-5797-49a80efa44e8",
+      "typeVersion": 2.1,
+      "parameters": {
+        "operation": "addLabels",
+        "messageId": "={{ $('Route result').item.json.email.messageId }}",
+        "labelIds": "={{ [$('Route result').item.json.email.labelIds.processed] }}"
+      },
+      "name": "Label: processed",
+      "type": "n8n-nodes-base.gmail",
+      "position": [
+        5940,
+        0
+      ],
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "",
+          "name": "OSAKA Gmail"
+        }
+      },
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000
+    },
+    {
+      "id": "29eee297-80a4-821b-2221-7ea7c823df15",
+      "typeVersion": 2,
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const crypto = require('crypto');\nconst sign = (parts) => {\n  const ts = String(Math.floor(Date.now() / 1000));\n  const sig = crypto.createHmac('sha256', $env.OSAKA_INGEST_SECRET).update(['v1', ts, ...parts].join('\\n')).digest('hex');\n  return { ts, signature: 'sha256=' + sig };\n};\nconst s = $('Route result').item.json;\nconst ref = $('Reply to sender').item.json.id;\nreturn { json: { extractionId: s.extractionId, target: 'reply', ref, ...sign([s.extractionId, 'reply', String(ref)]) } };"
+      },
+      "name": "Sign ack: reply",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        5720,
+        -100
+      ]
+    },
+    {
+      "id": "a1c512ae-b333-cc04-3f7b-74fa88e071e5",
+      "typeVersion": 4.2,
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.OSAKA_BASE_URL }}/api/ingest/fanout-ack",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-osaka-timestamp",
+              "value": "={{ $json.ts }}"
+            },
+            {
+              "name": "x-osaka-signature",
+              "value": "={{ $json.signature }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ extractionId: $json.extractionId, target: $json.target, ref: $json.ref }) }}",
+        "options": {}
+      },
+      "name": "Ack: reply",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        5940,
+        -100
+      ],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000
+    },
+    {
+      "id": "c538e310-c4f5-2838-9b00-a1964ff38a98",
+      "typeVersion": 2.1,
+      "parameters": {
+        "operation": "addLabels",
+        "messageId": "={{ $json.email.messageId }}",
+        "labelIds": "={{ [$json.email.labelIds.quarantine] }}"
+      },
+      "name": "Label: quarantine",
+      "type": "n8n-nodes-base.gmail",
+      "position": [
+        2200,
+        300
+      ],
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "",
+          "name": "OSAKA Gmail"
+        }
+      },
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000
+    },
+    {
+      "id": "95db418a-4cbe-1233-532f-d84da9769a77",
+      "typeVersion": 2,
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const s = $json;\nconst fileProblem = s.route === 'failed' && /PDF|attachment|password|pages/i.test(s.reason || '');\nreturn [{ json: { ...s, fileProblem } }];"
+      },
+      "name": "Failure notice",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        2200,
+        500
+      ]
+    },
+    {
+      "id": "ab603765-be26-915a-a923-cb8e0500af31",
+      "typeVersion": 2.2,
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "73709b84-a827-6e8e-7ecd-b9ee68b712cb",
+              "leftValue": "={{ $json.fileProblem }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "name": "Sender can fix it?",
+      "type": "n8n-nodes-base.if",
+      "position": [
+        2420,
+        500
+      ]
+    },
+    {
+      "id": "ae096b8f-0761-26fc-4fde-cbdc58eb6b87",
+      "typeVersion": 2.1,
+      "parameters": {
+        "operation": "reply",
+        "messageId": "={{ $json.email.messageId }}",
+        "emailType": "html",
+        "message": "=<p>Hi,</p><p>We couldn't process <b>{{ $json.email.fileName }}</b>: {{ $json.reason }}</p><p>Please reply with a corrected copy.</p><p>— OSAKA</p>",
+        "options": {
+          "appendAttribution": false,
+          "replyToSenderOnly": true
+        }
+      },
+      "name": "Reply: file problem",
+      "type": "n8n-nodes-base.gmail",
+      "position": [
+        2640,
+        400
+      ],
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "",
+          "name": "OSAKA Gmail"
+        }
+      },
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000
+    },
+    {
+      "id": "62868a3e-d825-a56a-db42-7ed71f6d40fd",
+      "typeVersion": 2.1,
+      "parameters": {
+        "operation": "addLabels",
+        "messageId": "={{ $('Failure notice').item.json.email.messageId }}",
+        "labelIds": "={{ [$('Failure notice').item.json.email.labelIds.failed] }}"
+      },
+      "name": "Label: failed",
+      "type": "n8n-nodes-base.gmail",
+      "position": [
+        2860,
+        500
+      ],
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "",
+          "name": "OSAKA Gmail"
+        }
+      },
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000
+    },
+    {
+      "id": "dfe9d015-f813-2c80-9b24-e168b61493f5",
+      "typeVersion": 2,
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const s = $('Route result').item.json;\nconst subject = 'OSAKA ' + (s.route === 'quarantined' ? 'quarantined' : 'failed') + ': ' + (s.email?.fileName || 'attachment') + ' from ' + (s.email?.senderEmail || '?');\nconst html = '<p><b>' + subject + '</b></p><p>Reason: ' + String(s.reason || s.error || 'unknown').replace(/</g, '&lt;') + '</p>' + (s.dashboardUrl ? '<p><a href=\"' + s.dashboardUrl.replace('host.docker.internal', 'localhost') + '\">Open in OSAKA inbox</a></p>' : '');\nreturn [{ json: { subject, html } }];"
+      },
+      "name": "Operator alert",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        3080,
+        400
+      ]
+    },
+    {
+      "id": "ad5f4915-2caf-e40b-54b1-a95229db8017",
+      "typeVersion": 2.1,
+      "parameters": {
+        "operation": "send",
+        "sendTo": "={{ $env.OSAKA_OPERATOR_EMAIL }}",
+        "subject": "={{ $json.subject }}",
+        "emailType": "html",
+        "message": "={{ $json.html }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "name": "Email operator",
+      "type": "n8n-nodes-base.gmail",
+      "position": [
+        3300,
+        400
+      ],
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "",
+          "name": "OSAKA Gmail"
+        }
+      },
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000
+    }
+  ],
+  "connections": {
+    "Gmail Trigger": {
+      "main": [
+        [
+          {
+            "node": "Prepare PDFs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare PDFs": {
+      "main": [
+        [
+          {
+            "node": "Get labels",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get labels": {
+      "main": [
+        [
+          {
+            "node": "Label map + items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Label map + items": {
+      "main": [
+        [
+          {
+            "node": "One at a time",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "One at a time": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Has PDF?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Has PDF?": {
+      "main": [
+        [
+          {
+            "node": "Sign request",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Reply: no PDF",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Reply: no PDF": {
+      "main": [
+        [
+          {
+            "node": "Label: failed (no PDF)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Label: failed (no PDF)": {
+      "main": [
+        [
+          {
+            "node": "One at a time",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sign request": {
+      "main": [
+        [
+          {
+            "node": "OSAKA: process PDF",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OSAKA: process PDF": {
+      "main": [
+        [
+          {
+            "node": "Route result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Route result": {
+      "main": [
+        [
+          {
+            "node": "By outcome",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "By outcome": {
+      "main": [
+        [
+          {
+            "node": "Drive owed?",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Label: quarantine",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Failure notice",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Failure notice",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Drive owed?": {
+      "main": [
+        [
+          {
+            "node": "Find client folder",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Sheet owed?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Find client folder": {
+      "main": [
+        [
+          {
+            "node": "Folder exists?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Folder exists?": {
+      "main": [
+        [
+          {
+            "node": "Need folder?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Need folder?": {
+      "main": [
+        [
+          {
+            "node": "Create client folder",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Upload PDF to Drive",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create client folder": {
+      "main": [
+        [
+          {
+            "node": "Use new folder",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Use new folder": {
+      "main": [
+        [
+          {
+            "node": "Upload PDF to Drive",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sign ack: drive": {
+      "main": [
+        [
+          {
+            "node": "Ack: drive",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ack: drive": {
+      "main": [
+        [
+          {
+            "node": "Sheet owed?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload PDF to Drive": {
+      "main": [
+        [
+          {
+            "node": "Sign ack: drive",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sheet owed?": {
+      "main": [
+        [
+          {
+            "node": "Sheet row",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Reply owed?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sheet row": {
+      "main": [
+        [
+          {
+            "node": "Append to Sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sign ack: sheets": {
+      "main": [
+        [
+          {
+            "node": "Ack: sheets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ack: sheets": {
+      "main": [
+        [
+          {
+            "node": "Reply owed?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append to Sheet": {
+      "main": [
+        [
+          {
+            "node": "Sign ack: sheets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Reply owed?": {
+      "main": [
+        [
+          {
+            "node": "Compose reply",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Label: processed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Compose reply": {
+      "main": [
+        [
+          {
+            "node": "Reply to sender",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sign ack: reply": {
+      "main": [
+        [
+          {
+            "node": "Ack: reply",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ack: reply": {
+      "main": [
+        [
+          {
+            "node": "Label: processed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Reply to sender": {
+      "main": [
+        [
+          {
+            "node": "Sign ack: reply",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Label: processed": {
+      "main": [
+        [
+          {
+            "node": "One at a time",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Failure notice": {
+      "main": [
+        [
+          {
+            "node": "Sender can fix it?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sender can fix it?": {
+      "main": [
+        [
+          {
+            "node": "Reply: file problem",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Label: failed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Reply: file problem": {
+      "main": [
+        [
+          {
+            "node": "Label: failed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Label: quarantine": {
+      "main": [
+        [
+          {
+            "node": "Operator alert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Label: failed": {
+      "main": [
+        [
+          {
+            "node": "Operator alert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Operator alert": {
+      "main": [
+        [
+          {
+            "node": "Email operator",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Email operator": {
+      "main": [
+        [
+          {
+            "node": "One at a time",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "errorWorkflow": "aGN2eSo0J-tIR8Qy"
+  },
+  "pinData": {}
+}

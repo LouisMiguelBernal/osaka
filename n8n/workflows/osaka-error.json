@@ -1,0 +1,146 @@
+{
+  "id": "aGN2eSo0J-tIR8Qy",
+  "name": "OSAKA — Error alert",
+  "nodes": [
+    {
+      "id": "289d956b-b037-ef69-a754-f60447e4e598",
+      "typeVersion": 1,
+      "parameters": {},
+      "name": "Error Trigger",
+      "type": "n8n-nodes-base.errorTrigger",
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "id": "feaed6b0-1484-8dd8-7805-1f592a77f820",
+      "typeVersion": 2,
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const j = $json;\nconst at = new Date().toISOString();\nconst rec = {\n  at,\n  workflow: j.workflow?.name,\n  node: j.execution?.lastNodeExecuted,\n  error: j.execution?.error?.message || j.trigger?.error?.message || 'unknown',\n  execution: String(j.execution?.url || '').replace('host.docker.internal', 'localhost'),\n  recovery: 'Nothing is lost: the PDF stays in inbox and the sweeper retries it within 10 minutes; emails keep the OSAKA/Inbox label and are retried on the next poll.',\n};\nconst name = at.replace(/[:.]/g, '-') + '.json';\nreturn [{ json: rec, binary: { data: { data: Buffer.from(JSON.stringify(rec, null, 2)).toString('base64'), mimeType: 'application/json', fileName: name } } }];"
+      },
+      "name": "Error record",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        220,
+        0
+      ]
+    },
+    {
+      "id": "778d3492-9d9c-f63c-8b32-9e40b0246a4c",
+      "typeVersion": 1,
+      "parameters": {
+        "operation": "write",
+        "fileName": "=/inbox/results/_errors/{{ $binary.data.fileName }}",
+        "dataPropertyName": "data",
+        "options": {}
+      },
+      "name": "Write error log",
+      "type": "n8n-nodes-base.readWriteFile",
+      "position": [
+        440,
+        0
+      ]
+    },
+    {
+      "id": "07ae9497-ab1e-d5ef-9f4e-3440d52c71d6",
+      "typeVersion": 2.2,
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "a1bd8495-d6b7-66c8-a431-e9a552a51412",
+              "leftValue": "={{ $env.OSAKA_OPERATOR_EMAIL }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "name": "Email configured?",
+      "type": "n8n-nodes-base.if",
+      "position": [
+        660,
+        0
+      ]
+    },
+    {
+      "id": "6dd6ccdf-15b6-7716-8fb7-cd346c943124",
+      "typeVersion": 1.2,
+      "parameters": {
+        "source": "database",
+        "workflowId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "2mlpxaJ8OKWc7jtT"
+        },
+        "options": {
+          "waitForSubWorkflow": false
+        }
+      },
+      "name": "Send error email",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "position": [
+        880,
+        -80
+      ]
+    }
+  ],
+  "connections": {
+    "Error Trigger": {
+      "main": [
+        [
+          {
+            "node": "Error record",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Error record": {
+      "main": [
+        [
+          {
+            "node": "Write error log",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Email configured?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Email configured?": {
+      "main": [
+        [
+          {
+            "node": "Send error email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "pinData": {}
+}

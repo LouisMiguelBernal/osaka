@@ -1,0 +1,63 @@
+{
+  "id": "2mlpxaJ8OKWc7jtT",
+  "name": "OSAKA — Error email",
+  "nodes": [
+    {
+      "id": "add89198-b64c-60fe-a124-4c955c396750",
+      "typeVersion": 1.1,
+      "parameters": {
+        "inputSource": "passthrough"
+      },
+      "name": "Called by Error alert",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "id": "5f6e19c7-8ba6-f9d6-1364-98eaeb5414d1",
+      "typeVersion": 2.1,
+      "parameters": {
+        "operation": "send",
+        "sendTo": "={{ $env.OSAKA_OPERATOR_EMAIL }}",
+        "subject": "=OSAKA workflow error: {{ $json.workflow }}",
+        "emailType": "html",
+        "message": "=<p>The workflow <b>{{ $json.workflow }}</b> stopped at node <b>{{ $json.node }}</b>.</p><p>{{ $json.error }}</p><p><a href=\"{{ $json.execution }}\">Open the execution</a>. {{ $json.recovery }}</p>",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "name": "Email operator",
+      "type": "n8n-nodes-base.gmail",
+      "position": [
+        240,
+        0
+      ],
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "",
+          "name": "OSAKA Gmail"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Called by Error alert": {
+      "main": [
+        [
+          {
+            "node": "Email operator",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "pinData": {}
+}
