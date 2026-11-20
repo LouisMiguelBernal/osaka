@@ -34,8 +34,8 @@ export default async function InboxPage({ searchParams }: { searchParams: Promis
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold">Inbox</h1>
-        <p className="mt-1 text-sm text-[var(--color-muted)]">
+        <h1 className="display text-6xl">Inbox</h1>
+        <p className="mt-3 text-sm text-[var(--color-muted)]">
           PDFs received by email or folder drop, read by the local model. Nothing becomes a record until you approve it.
         </p>
       </div>
@@ -68,8 +68,8 @@ export default async function InboxPage({ searchParams }: { searchParams: Promis
       ) : (
         <div className="card overflow-x-auto">
           <table className="w-full text-sm">
-            <thead className="text-left text-xs uppercase tracking-wide text-[var(--color-muted)]">
-              <tr className="border-b border-[var(--color-line)]">
+            <thead className="label text-left text-[var(--color-muted)]">
+              <tr className="border-b border-[var(--color-rule)]">
                 <th className="px-4 py-3">Status</th>
                 <th className="px-4 py-3">Document</th>
                 <th className="px-4 py-3">Sender</th>

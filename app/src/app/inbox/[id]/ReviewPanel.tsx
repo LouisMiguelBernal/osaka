@@ -33,7 +33,7 @@ export function ReviewPanel(props: { id: string; status: string; specs: Spec[]; 
   return (
     <section className="card space-y-4 p-4" aria-labelledby="fields-h">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h2 id="fields-h" className="font-semibold">Extracted fields</h2>
+        <h2 id="fields-h" className="display text-3xl">Extracted fields</h2>
         <div className="flex flex-wrap gap-2">
           {editable && (
             <>

@@ -1,44 +1,55 @@
 @import "tailwindcss";
 
-/* OSAKA palette: emerald/teal on slate. Every pair below clears WCAG AA (lowest 4.8:1). */
+/* OSAKA palette: washi paper, sumi ink, vermilion seal (E-Ink / Paper).
+   Every text pair below clears WCAG AA. */
 @theme {
   --font-sans: "Inter", "Segoe UI", system-ui, sans-serif;
-  --color-ink: #022c22;
-  --color-muted: #475569;
-  --color-ground: #eef6f3;
-  --color-surface: #ffffff;
-  --color-line: #d7e5e0;
-  --color-accent: #0f766e;
-  --color-accent-hover: #115e59;
-  --color-accent-ink: #0f766e;
-  --color-ok: #047857;
-  --color-ok-bg: #d1fae5;
-  --color-warn: #92400e;
-  --color-warn-bg: #fef3c7;
-  --color-bad: #991b1b;
-  --color-bad-bg: #fee2e2;
-  --color-info: #334155;
-  --color-info-bg: #e2e8f0;
+  --font-serif: var(--font-instrument-serif), "Iowan Old Style", Georgia, serif;
+  --font-mono: var(--font-fragment-mono), ui-monospace, "Cascadia Mono", Consolas, monospace;
+  --color-ink: #1a1a1a;
+  --color-muted: #5c564c;
+  --color-ground: #f4f1ea;
+  --color-surface: #fbf9f4;
+  --color-field: #f4f1ea;
+  --color-line: #d8d1c3;
+  --color-rule: #1a1a1a;
+  --color-accent: #c8372d;
+  --color-accent-hover: #a82d24;
+  --color-accent-ink: #b03026;
+  --color-ok: #2f5a3a;
+  --color-ok-bg: #e2e6d6;
+  --color-warn: #7a4d00;
+  --color-warn-bg: #f0e2c2;
+  --color-bad: #9e2a22;
+  --color-bad-bg: #f3dcd5;
+  --color-info: #3b3833;
+  --color-info-bg: #e3dccd;
 }
 
+:root { --paper-noise-opacity: 0.32; }
+
+/* Night variant: sumi paper, same seal. */
 @media (prefers-color-scheme: dark) {
   :root {
-    --color-ink: #e2f3ee;
-    --color-muted: #94a3b8;
-    --color-ground: #0f1714;
-    --color-surface: #16211d;
-    --color-line: #24342e;
-    --color-accent: #0e8074;
-    --color-accent-hover: #0f766e;
-    --color-accent-ink: #5eead4;
-    --color-ok: #6ee7b7;
-    --color-ok-bg: rgba(16, 185, 129, 0.14);
-    --color-warn: #fcd34d;
-    --color-warn-bg: rgba(245, 158, 11, 0.14);
-    --color-bad: #fca5a5;
-    --color-bad-bg: rgba(220, 38, 38, 0.16);
-    --color-info: #cbd5e1;
-    --color-info-bg: rgba(148, 163, 184, 0.14);
+    --color-ink: #ece7dc;
+    --color-muted: #a39c8f;
+    --color-ground: #141311;
+    --color-surface: #1c1a17;
+    --color-field: #141311;
+    --color-line: #34302a;
+    --color-rule: #ece7dc;
+    --color-accent: #c8372d;
+    --color-accent-hover: #b03026;
+    --color-accent-ink: #e8695e;
+    --color-ok: #a9c7a0;
+    --color-ok-bg: rgba(122, 160, 110, 0.16);
+    --color-warn: #e6c27a;
+    --color-warn-bg: rgba(200, 150, 50, 0.16);
+    --color-bad: #f0948a;
+    --color-bad-bg: rgba(200, 55, 45, 0.2);
+    --color-info: #d4cdbf;
+    --color-info-bg: rgba(236, 231, 220, 0.1);
+    --paper-noise-opacity: 0.08;
   }
 }
 
@@ -46,23 +57,36 @@ body {
   background: var(--color-ground);
   color: var(--color-ink);
   font-family: var(--font-sans);
+  position: relative;
+  isolation: isolate;
 }
 
-.card { background: var(--color-surface); border: 1px solid var(--color-line); border-radius: 10px; }
-.btn { border-radius: 9999px; padding: 0.45rem 1rem; font-size: 0.875rem; font-weight: 600; transition: background 0.15s; }
-.btn:disabled { opacity: 0.5; cursor: not-allowed; }
+/* fine paper grain */
+body::before {
+  content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none;
+  opacity: var(--paper-noise-opacity); mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+@media (prefers-color-scheme: dark) { body::before { mix-blend-mode: screen; } }
+
+.display { font-family: var(--font-serif); font-weight: 400; letter-spacing: -0.025em; line-height: 1; }
+.label { font-family: var(--font-mono); font-size: 0.6875rem; letter-spacing: 0.08em; text-transform: uppercase; }
+
+.card { background: var(--color-surface); border: 1px solid var(--color-line); border-top: 1px solid var(--color-rule); border-radius: 2px; }
+.btn { border-radius: 2px; padding: 0.5rem 1rem; font-family: var(--font-mono); font-size: 0.75rem; letter-spacing: 0.06em; text-transform: uppercase; transition: background 0.15s; }
+.btn:disabled { opacity: 0.45; cursor: not-allowed; }
 .btn-primary { background: var(--color-accent); color: #fff; }
 .btn-primary:hover:not(:disabled) { background: var(--color-accent-hover); }
-.btn-ghost { border: 1px solid var(--color-line); }
+.btn-ghost { border: 1px solid var(--color-rule); }
 .btn-ghost:hover:not(:disabled) { background: var(--color-ground); }
-.input { width: 100%; background: var(--color-ground); border: 1px solid var(--color-line); border-radius: 8px; padding: 0.45rem 0.65rem; font-size: 0.875rem; }
+.input { width: 100%; background: var(--color-field); border: 1px solid var(--color-line); border-radius: 2px; padding: 0.45rem 0.65rem; font-size: 0.875rem; }
 .input:focus { outline: 2px solid var(--color-accent); outline-offset: 1px; }
-.badge { display: inline-flex; align-items: center; border-radius: 9999px; padding: 0.1rem 0.6rem; font-size: 0.75rem; font-weight: 600; white-space: nowrap; }
+.badge { display: inline-flex; align-items: center; border-radius: 2px; padding: 0.15rem 0.5rem; font-family: var(--font-mono); font-size: 0.6875rem; letter-spacing: 0.04em; white-space: nowrap; }
 .badge[data-tone="ok"] { background: var(--color-ok-bg); color: var(--color-ok); }
 .badge[data-tone="warn"] { background: var(--color-warn-bg); color: var(--color-warn); }
 .badge[data-tone="bad"] { background: var(--color-bad-bg); color: var(--color-bad); }
 .badge[data-tone="info"] { background: var(--color-info-bg); color: var(--color-info); }
-.chip { border: 1px solid var(--color-line); border-radius: 9999px; padding: 0.3rem 0.8rem; font-size: 0.8125rem; }
-.chip[data-active="true"] { background: var(--color-accent); border-color: var(--color-accent); color: #fff; }
+.chip { border: 1px solid var(--color-line); border-radius: 2px; padding: 0.3rem 0.8rem; font-family: var(--font-mono); font-size: 0.75rem; }
+.chip[data-active="true"] { background: var(--color-rule); border-color: var(--color-rule); color: var(--color-ground); }
 a.link { color: var(--color-accent-ink); }
-a.link:hover { text-decoration: underline; }
+a.link:hover { text-decoration: underline; text-underline-offset: 3px; }

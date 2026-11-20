@@ -35,10 +35,10 @@ export default async function DocumentPage({ params }: { params: Promise<{ id: s
 
   return (
     <div className="space-y-6">
-      <Link href="/inbox" className="link text-sm">← Inbox</Link>
+      <Link href="/inbox" className="link label">← Inbox</Link>
       <div>
         <div className="flex flex-wrap items-center gap-3">
-          <h1 className="break-all text-2xl font-bold">{row.fileName}</h1>
+          <h1 className="break-all text-3xl font-semibold tracking-tight">{row.fileName}</h1>
           <span className="badge" data-tone={STATUS[row.status]?.tone ?? "info"}>{STATUS[row.status]?.label ?? row.status}</span>
         </div>
         <p className="mt-1 text-sm text-[var(--color-muted)]">
@@ -55,7 +55,7 @@ export default async function DocumentPage({ params }: { params: Promise<{ id: s
       <div className="grid gap-6 lg:grid-cols-[1fr_2fr]">
         <aside className="space-y-4">
           <section className="card space-y-3 p-4 text-sm">
-            <h2 className="font-semibold">Details</h2>
+            <h2 className="label">Details</h2>
             <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1">
               {facts.map(([k, v]) => (
                 <div key={k} className="contents">
@@ -70,13 +70,13 @@ export default async function DocumentPage({ params }: { params: Promise<{ id: s
           </section>
           {row.classifyReason && (
             <section className="card p-4 text-sm">
-              <h2 className="mb-1 font-semibold">Why this type</h2>
+              <h2 className="label mb-2">Why this type</h2>
               <p className="text-[var(--color-muted)]">{row.classifyReason}</p>
             </section>
           )}
           {checks.length > 0 && (
             <section className="card p-4 text-sm">
-              <h2 className="mb-2 font-semibold">Cross-checks</h2>
+              <h2 className="label mb-2">Cross-checks</h2>
               <ul className="space-y-2">
                 {checks.map((c) => (
                   <li key={c.id}>
@@ -89,7 +89,7 @@ export default async function DocumentPage({ params }: { params: Promise<{ id: s
           )}
           {row.warnings.length > 0 && (
             <section className="card p-4 text-sm">
-              <h2 className="mb-1 font-semibold">Warnings</h2>
+              <h2 className="label mb-2">Warnings</h2>
               <ul className="list-disc space-y-1 pl-5 text-[var(--color-muted)]">{row.warnings.map((w) => <li key={w}>{w}</li>)}</ul>
             </section>
           )}
